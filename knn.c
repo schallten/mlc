@@ -1,82 +1,33 @@
-#include <math.h>
+#include "libs/knn.h"
 #include <stdio.h>
 
-struct Point {
-  int x1;
-  int x2;
-  int x3;
-  char result;
-  double distance;
-};
+int main(void) {
+  int n_obs, n_features, k;
 
-int main() {
-  int obs = 6;
-  int predics = 3;
-  int k = 3;
+  printf("Number of observations: ");
+  scanf("%d", &n_obs);
 
-  struct Point data[obs];
-  struct Point sorted[obs];
+  printf("Number of features: ");
+  scanf("%d", &n_features);
 
-  // Read training data
-  for (int i = 0; i < obs; i++) {
-    scanf("%d %d %d %c", &data[i].x1, &data[i].x2, &data[i].x3,
-          &data[i].result);
+  printf("k: ");
+  scanf("%d", &k);
+
+  float training_features[n_obs][3];
+  char training_labels[n_obs];
+
+  printf("Enter training data (x1 x2 x3 label):\n");
+  for (int i = 0; i < n_obs; i++) {
+    scanf("%f %f %f %c", &training_features[i][0], &training_features[i][1],
+          &training_features[i][2], &training_labels[i]);
   }
 
-  int test[predics];
+  float test_point[3];
+  printf("Enter test point (x1 x2 x3): ");
+  scanf("%f %f %f", &test_point[0], &test_point[1], &test_point[2]);
 
-  // Read the point we want to classify
-  for (int i = 0; i < predics; i++) {
-    scanf("%d", &test[i]);
-  }
-
-  for (int i = 0; i < obs; i++) {
-    sorted[i] = data[i];
-  }
-
-  // Calculate distance from test point to every observation
-  for (int i = 0; i < obs; i++) {
-    double sum = 0;
-
-    sum += (test[0] - sorted[i].x1) * (test[0] - sorted[i].x1);
-
-    sum += (test[1] - sorted[i].x2) * (test[1] - sorted[i].x2);
-
-    sum += (test[2] - sorted[i].x3) * (test[2] - sorted[i].x3);
-
-    sorted[i].distance = sqrt(sum);
-  }
-
-  // Sort observations from smallest distance to largest
-  for (int i = 0; i < obs - 1; i++) {
-    for (int j = 0; j < obs - i - 1; j++) {
-      if (sorted[j].distance > sorted[j + 1].distance) {
-        struct Point temp = sorted[j];
-        sorted[j] = sorted[j + 1];
-        sorted[j + 1] = temp;
-      }
-    }
-  }
-
-  int countA = 0;
-  int countB = 0;
-
-  // Look at the k closest observations
-  for (int i = 0; i < k; i++) {
-    if (sorted[i].result == 'A') {
-      countA++;
-    } else if (sorted[i].result == 'B') {
-      countB++;
-    }
-  }
-
-  char prediction;
-
-  if (countA > countB) {
-    prediction = 'A';
-  } else {
-    prediction = 'B';
-  }
+  char prediction = knn_predict(training_features, training_labels, n_obs,
+                                test_point, k);
 
   printf("Prediction: %c\n", prediction);
 
